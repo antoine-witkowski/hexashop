@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/main.ts"
+    "dev": "tsx watch src/main.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "tsx": "^4.23.15"
