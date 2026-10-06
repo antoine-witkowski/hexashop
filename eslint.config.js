@@ -67,8 +67,21 @@ export default defineConfig(
               message:
                 "application/ must not import infrastructure/: depend on a port instead.",
             },
+            {
+              regex: "^@nestjs/",
+              message:
+                "Use cases must not depend on NestJS: wire them in an infrastructure module instead.",
+            },
           ],
         },
+      ],
+    },
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-extraneous-class": [
+        "error",
+        { allowWithDecorator: true },
       ],
     },
   },
