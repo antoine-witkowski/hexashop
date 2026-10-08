@@ -37,10 +37,7 @@ export class Order {
       throw new EmptyOrderError();
     }
 
-    let totalCents: number = 0;
-    lines.forEach((line) => {
-      totalCents += line.subtotalCents;
-    });
+    const totalCents: number = this.#totalOf(lines);
 
     return new Order(id, customerId, status, [...lines], totalCents, placedAt);
   }
@@ -66,5 +63,26 @@ export class Order {
       throw new InvalidStatusTransitionError(this.#status, next);
     }
     this.#status = next;
+  }
+
+  static reconstitute(props: {
+    id: string;
+    customerId: string;
+    status: OrderStatus;
+    lines: readonly OrderLine[];
+    placedAt: Date;
+  }): Order {
+    const { id, customerId, status, lines, placedAt } = props;
+    const totalCents: number = this.#totalOf(lines);
+    return new Order(id, customerId, status, [...lines], totalCents, placedAt);
+  }
+
+  static #totalOf(lines: readonly OrderLine[]): number {
+    let total: number = 0;
+    lines.forEach((line) => {
+      total += line.subtotalCents;
+    });
+
+    return total;
   }
 }

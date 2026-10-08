@@ -89,3 +89,33 @@ describe("Order status transitions", () => {
     }).toThrow(InvalidStatusTransitionError);
   });
 });
+
+describe("Order.reconstitute", () => {
+  it("restores an order in its stored status", () => {
+    const order = Order.reconstitute({
+      id: "order-1",
+      customerId: "customer-1",
+      status: "CONFIRMED",
+      lines: [line(2, 1000), line(1, 500)],
+      placedAt,
+    });
+
+    expect(order.status).toBe("CONFIRMED");
+    expect(order.totalCents).toBe(2500);
+    expect(order.placedAt).toEqual(placedAt);
+  });
+
+  it("still enforces status transitions", () => {
+    const order = Order.reconstitute({
+      id: "order-1",
+      customerId: "customer-1",
+      status: "SHIPPED",
+      lines: [line(1, 1000)],
+      placedAt,
+    });
+
+    expect(() => {
+      order.cancel();
+    }).toThrow(InvalidStatusTransitionError);
+  });
+});
