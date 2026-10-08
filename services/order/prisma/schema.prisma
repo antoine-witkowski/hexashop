@@ -1,0 +1,37 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/infrastructure/persistence/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  SHIPPED
+}
+
+model Order {
+  id         String      @id @db.Uuid
+  customerId String      @map("customer_id")
+  status     OrderStatus
+  placedAt   DateTime    @map("placed_at") @db.Timestamptz
+  lines      OrderLine[]
+
+  @@map("orders")
+}
+
+model OrderLine {
+  orderId        String @map("order_id") @db.Uuid
+  position       Int
+  sku            String
+  quantity       Int
+  unitPriceCents Int    @map("unit_price_cents")
+  order          Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@id([orderId, position])
+  @@map("order_lines")
+}

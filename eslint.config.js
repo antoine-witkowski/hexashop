@@ -4,13 +4,15 @@ import tseslint from "typescript-eslint";
 import prettier from "eslint-config-prettier";
 
 export default defineConfig(
-  { ignores: ["**/dist/**", "**/coverage/**"] },
+  { ignores: ["**/dist/**", "**/coverage/**", "**/generated/**"] },
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
   {
     languageOptions: {
       parserOptions: {
-        projectService: { allowDefaultProject: ["*.ts"] },
+        projectService: {
+          allowDefaultProject: ["*.ts", "services/*/prisma.config.ts"],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -46,11 +48,6 @@ export default defineConfig(
         {
           paths: [
             {
-              name: "fastify",
-              message:
-                "Use cases must not know about HTTP: expose them through an adapter in infrastructure/.",
-            },
-            {
               name: "pg",
               message:
                 "Use cases must not know about the database: depend on a port and implement it in infrastructure/.",
@@ -71,6 +68,11 @@ export default defineConfig(
               regex: "^@nestjs/",
               message:
                 "Use cases must not depend on NestJS: wire them in an infrastructure module instead.",
+            },
+            {
+              regex: "^@prisma/|(^|/)generated(/|$)",
+              message:
+                "Use cases must not depend on Prisma: go through the OrderRepository port.",
             },
           ],
         },
