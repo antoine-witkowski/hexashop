@@ -10,6 +10,15 @@ const allowedTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
   SHIPPED: [],
 };
 
+function totalOf(lines: readonly OrderLine[]): number {
+  let total: number = 0;
+  lines.forEach((line) => {
+    total += line.subtotalCents;
+  });
+
+  return total;
+}
+
 export class Order {
   #status: OrderStatus;
 
@@ -37,7 +46,7 @@ export class Order {
       throw new EmptyOrderError();
     }
 
-    const totalCents: number = this.#totalOf(lines);
+    const totalCents: number = totalOf(lines);
 
     return new Order(id, customerId, status, [...lines], totalCents, placedAt);
   }
@@ -73,16 +82,7 @@ export class Order {
     placedAt: Date;
   }): Order {
     const { id, customerId, status, lines, placedAt } = props;
-    const totalCents: number = this.#totalOf(lines);
+    const totalCents: number = totalOf(lines);
     return new Order(id, customerId, status, [...lines], totalCents, placedAt);
-  }
-
-  static #totalOf(lines: readonly OrderLine[]): number {
-    let total: number = 0;
-    lines.forEach((line) => {
-      total += line.subtotalCents;
-    });
-
-    return total;
   }
 }
