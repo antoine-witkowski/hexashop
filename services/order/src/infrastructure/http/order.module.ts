@@ -1,5 +1,6 @@
 import { type DynamicModule, Module } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
+import { GetOrder } from "../../application/get-order.js";
 import { PlaceOrder } from "../../application/place-order.js";
 import type { Clock } from "../../application/ports/clock.js";
 import type { IdGenerator } from "../../application/ports/id-generator.js";
@@ -8,7 +9,6 @@ import { RandomIdGenerator } from "../random-id-generator.js";
 import { SystemClock } from "../system-clock.js";
 import { ErrorFilter } from "./error.filter.js";
 import { OrderController } from "./order.controller.js";
-import { GetOrder } from "../../application/get-order.js";
 
 const ORDER_REPOSITORY = Symbol("OrderRepository");
 const CLOCK = Symbol("Clock");
