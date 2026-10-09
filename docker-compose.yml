@@ -1,15 +1,54 @@
+# Local infrastructure only. The Node services run on the host with `tsx watch`.
+
 services:
+  # PostgreSQL: one server, one database per service (see infra/postgres/init.sql).
   postgres:
     image: postgres:17
     environment:
       POSTGRES_USER: hexashop
       POSTGRES_PASSWORD: hexashop
-    ports: ["5432:5432"]
+    ports:
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hexashop"]
+      test: pg_isready -U hexashop
       interval: 5s
+
+  # NATS with JetStream: stores the events published by the services.
+  nats:
+    image: nats:2.12-alpine
+    command: --jetstream --store_dir /data --http_port 8222
+    ports:
+      - "4222:4222" # clients
+      - "8222:8222" # monitoring (http://localhost:8222)
+    volumes:
+      - natsdata:/data
+    healthcheck:
+      test: wget -qO- "http://localhost:8222/healthz?js-enabled-only=true" || exit 1
+      interval: 5s
+
+  # One-shot job: creates the ORDERS stream if it does not exist yet, then exits.
+  nats-init:
+    image: natsio/nats-box:0.20.0
+    environment:
+      NATS_URL: nats://nats:4222
+    depends_on:
+      nats:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - >
+        nats stream info ORDERS > /dev/null 2>&1 ||
+        nats stream add ORDERS
+        --subjects "hexashop.orders.v1.>"
+        --storage file
+        --retention limits
+        --max-age 30d
+        --defaults
+
 volumes:
   pgdata:
+  natsdata:
