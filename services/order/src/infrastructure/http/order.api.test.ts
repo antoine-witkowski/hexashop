@@ -5,12 +5,16 @@ import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { OrderResponse } from "./order-presenter.js";
 import { OrderModule } from "./order.module.js";
+import { InMemoryOrderRepository } from "../in-memory-order-repository.js";
 
 describe("Orders API", () => {
   let app: INestApplication<Server>;
 
   beforeEach(async () => {
-    app = await NestFactory.create(OrderModule, { logger: false });
+    app = await NestFactory.create(
+      OrderModule.register({ orderRepository: new InMemoryOrderRepository() }),
+      { logger: false },
+    );
     await app.init();
   });
 
