@@ -119,3 +119,43 @@ describe("Order.reconstitute", () => {
     }).toThrow(InvalidStatusTransitionError);
   });
 });
+
+describe("Order events", () => {
+  it("records an OrderPlaced event when placed", () => {
+    const order = placeOrder([line(2, 1000), line(1, 500)]);
+
+    expect(order.pullEvents()).toEqual([
+      {
+        type: "OrderPlaced",
+        orderId: "order-1",
+        customerId: "customer-1",
+        lines: [
+          { sku: "SKU-1", quantity: 2 },
+          { sku: "SKU-1", quantity: 1 },
+        ],
+        totalCents: 2500,
+        occurredAt: placedAt,
+      },
+    ]);
+  });
+
+  it("empties the events once pulled", () => {
+    const order = placeOrder();
+
+    order.pullEvents();
+
+    expect(order.pullEvents()).toEqual([]);
+  });
+
+  it("records no event when reconstituted", () => {
+    const order = Order.reconstitute({
+      id: "order-1",
+      customerId: "customer-1",
+      status: "CONFIRMED",
+      lines: [line(1, 1000)],
+      placedAt,
+    });
+
+    expect(order.pullEvents()).toEqual([]);
+  });
+});

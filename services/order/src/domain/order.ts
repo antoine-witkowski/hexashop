@@ -1,4 +1,5 @@
 import { EmptyOrderError, InvalidStatusTransitionError } from "./errors.js";
+import type { OrderEvent } from "./events.js";
 import type { OrderLine } from "./order-line.js";
 
 export type OrderStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "SHIPPED";
@@ -21,6 +22,7 @@ function totalOf(lines: readonly OrderLine[]): number {
 
 export class Order {
   #status: OrderStatus;
+  #events: OrderEvent[] = [];
 
   private constructor(
     readonly id: string,
@@ -31,6 +33,12 @@ export class Order {
     readonly placedAt: Date,
   ) {
     this.#status = status;
+  }
+
+  pullEvents(): readonly OrderEvent[] {
+    const events = this.#events;
+    this.#events = [];
+    return events;
   }
 
   static place(props: {
@@ -48,7 +56,27 @@ export class Order {
 
     const totalCents: number = totalOf(lines);
 
-    return new Order(id, customerId, status, [...lines], totalCents, placedAt);
+    const order = new Order(
+      id,
+      customerId,
+      status,
+      [...lines],
+      totalCents,
+      placedAt,
+    );
+
+    order.#events.push({
+      type: "OrderPlaced",
+      orderId: order.id,
+      customerId: order.customerId,
+      lines: order.lines.map((line) => {
+        return { sku: line.sku, quantity: line.quantity };
+      }),
+      totalCents: order.totalCents,
+      occurredAt: order.placedAt,
+    });
+
+    return order;
   }
 
   confirm(): void {
