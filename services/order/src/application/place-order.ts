@@ -1,5 +1,5 @@
-import { Order } from "../domain/order.js";
 import { OrderLine } from "../domain/order-line.js";
+import { Order } from "../domain/order.js";
 import type { Clock } from "./ports/clock.js";
 import type { IdGenerator } from "./ports/id-generator.js";
 import type { OrderRepository } from "./ports/order-repository.js";

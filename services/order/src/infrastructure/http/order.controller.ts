@@ -2,7 +2,7 @@ import { Body, Controller, Get, Inject, Param, Post } from "@nestjs/common";
 import { z } from "zod";
 import { GetOrder } from "../../application/get-order.js";
 import { PlaceOrder } from "../../application/place-order.js";
-import { type OrderResponse, toOrderResponse } from "./order-presenter.js";
+import { toOrderResponse, type OrderResponse } from "./order-presenter.js";
 import { ZodValidationPipe } from "./zod-validation.pipe.js";
 
 const placeOrderBody = z.object({

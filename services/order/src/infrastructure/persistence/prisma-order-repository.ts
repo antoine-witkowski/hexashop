@@ -1,6 +1,6 @@
 import type { OrderRepository } from "../../application/ports/order-repository.js";
-import { Order } from "../../domain/order.js";
 import { OrderLine } from "../../domain/order-line.js";
+import { Order } from "../../domain/order.js";
 import type { PrismaClient } from "./generated/client.js";
 
 export class PrismaOrderRepository implements OrderRepository {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { Order } from "../domain/order.js";
 import { OrderLine } from "../domain/order-line.js";
+import { Order } from "../domain/order.js";
 import { InMemoryOrderRepository } from "./in-memory-order-repository.js";
 
 function anOrder(id: string): Order {

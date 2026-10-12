@@ -1,4 +1,4 @@
-import { type DynamicModule, Module } from "@nestjs/common";
+import { Module, type DynamicModule } from "@nestjs/common";
 import { APP_FILTER } from "@nestjs/core";
 import { GetOrder } from "../../application/get-order.js";
 import { PlaceOrder } from "../../application/place-order.js";

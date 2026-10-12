@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { EmptyOrderError, InvalidStatusTransitionError } from "./errors.js";
-import { Order } from "./order.js";
 import { OrderLine } from "./order-line.js";
+import { Order } from "./order.js";
 
 const placedAt = new Date("2026-01-01T10:00:00Z");
 
