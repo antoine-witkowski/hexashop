@@ -1,5 +1,7 @@
+import type { OrderEvent } from "../../domain/events.js";
 import type { Order } from "../../domain/order.js";
 import type { Clock } from "../ports/clock.js";
+import type { EventPublisher } from "../ports/event-publisher.js";
 import type { IdGenerator } from "../ports/id-generator.js";
 import type { OrderRepository } from "../ports/order-repository.js";
 
@@ -29,5 +31,14 @@ export class FixedIdGenerator implements IdGenerator {
 
   generate(): string {
     return this.id;
+  }
+}
+
+export class FakeEventPublisher implements EventPublisher {
+  readonly published: OrderEvent[] = [];
+
+  publish(events: readonly OrderEvent[]): Promise<void> {
+    this.published.push(...events);
+    return Promise.resolve();
   }
 }

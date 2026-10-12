@@ -3,6 +3,7 @@ import { z } from "zod";
 const configSchema = z.object({
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/ }),
   PORT: z.coerce.number().int().positive().default(3000),
+  NATS_URL: z.url({ protocol: /^nats$/ }),
 });
 
 export type Config = z.infer<typeof configSchema>;

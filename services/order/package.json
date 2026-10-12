@@ -19,6 +19,8 @@
   },
   "dependencies": {
     "@hexashop/contracts": "workspace:*",
+    "@nats-io/jetstream": "^3.4.0",
+    "@nats-io/transport-node": "^3.4.0",
     "@nestjs/common": "^12.1.2",
     "@nestjs/core": "^12.1.2",
     "@nestjs/platform-express": "^12.1.2",

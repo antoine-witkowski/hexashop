@@ -3,6 +3,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { GetOrder } from "../../application/get-order.js";
 import { PlaceOrder } from "../../application/place-order.js";
 import type { Clock } from "../../application/ports/clock.js";
+import type { EventPublisher } from "../../application/ports/event-publisher.js";
 import type { IdGenerator } from "../../application/ports/id-generator.js";
 import type { OrderRepository } from "../../application/ports/order-repository.js";
 import { RandomIdGenerator } from "../random-id-generator.js";
@@ -13,9 +14,11 @@ import { OrderController } from "./order.controller.js";
 const ORDER_REPOSITORY = Symbol("OrderRepository");
 const CLOCK = Symbol("Clock");
 const ID_GENERATOR = Symbol("IdGenerator");
+const EVENT_PUBLISHER = Symbol("EventPublisher");
 
 export interface OrderModuleOptions {
   orderRepository: OrderRepository;
+  eventPublisher: EventPublisher;
 }
 
 @Module({})
@@ -28,14 +31,16 @@ export class OrderModule {
         { provide: ORDER_REPOSITORY, useValue: options.orderRepository },
         { provide: CLOCK, useClass: SystemClock },
         { provide: ID_GENERATOR, useClass: RandomIdGenerator },
+        { provide: EVENT_PUBLISHER, useValue: options.eventPublisher },
         {
           provide: PlaceOrder,
-          inject: [ORDER_REPOSITORY, CLOCK, ID_GENERATOR],
+          inject: [ORDER_REPOSITORY, CLOCK, ID_GENERATOR, EVENT_PUBLISHER],
           useFactory: (
             orders: OrderRepository,
             clock: Clock,
             ids: IdGenerator,
-          ) => new PlaceOrder(orders, clock, ids),
+            events: EventPublisher,
+          ) => new PlaceOrder(orders, clock, ids, events),
         },
         {
           provide: GetOrder,

@@ -1,6 +1,7 @@
 import { OrderLine } from "../domain/order-line.js";
 import { Order } from "../domain/order.js";
 import type { Clock } from "./ports/clock.js";
+import type { EventPublisher } from "./ports/event-publisher.js";
 import type { IdGenerator } from "./ports/id-generator.js";
 import type { OrderRepository } from "./ports/order-repository.js";
 
@@ -14,6 +15,7 @@ export class PlaceOrder {
     private readonly orders: OrderRepository,
     private readonly clock: Clock,
     private readonly ids: IdGenerator,
+    private readonly events: EventPublisher,
   ) {}
 
   async execute(command: PlaceOrderCommand): Promise<Order> {
@@ -25,6 +27,9 @@ export class PlaceOrder {
       placedAt: this.clock.now(),
     });
     await this.orders.save(order);
+
+    await this.events.publish(order.pullEvents());
+
     return order;
   }
 }

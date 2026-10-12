@@ -52,11 +52,6 @@ export default defineConfig(
               message:
                 "Use cases must not know about the database: depend on a port and implement it in infrastructure/.",
             },
-            {
-              name: "@confluentinc/kafka-javascript",
-              message:
-                "Use cases must not know about Kafka: depend on a port and implement it in infrastructure/.",
-            },
           ],
           patterns: [
             {
@@ -73,6 +68,11 @@ export default defineConfig(
               regex: "^@prisma/|(^|/)generated(/|$)",
               message:
                 "Use cases must not depend on Prisma: go through the OrderRepository port.",
+            },
+            {
+              regex: "^@nats-io/",
+              message:
+                "Use cases must not know about NATS: depend on the EventPublisher port instead.",
             },
           ],
         },
