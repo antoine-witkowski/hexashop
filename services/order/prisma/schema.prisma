@@ -35,3 +35,15 @@ model OrderLine {
   @@id([orderId, position])
   @@map("order_lines")
 }
+
+model OutboxMessage {
+  id          String    @id @db.Uuid
+  aggregateId String    @map("aggregate_id")
+  subject     String
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  publishedAt DateTime? @map("published_at") @db.Timestamptz
+
+  @@map("outbox")
+}
