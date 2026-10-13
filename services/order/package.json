@@ -8,7 +8,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
-    "db:generate": "prisma generate"
+    "db:generate": "prisma generate",
+    "debug:consume": "tsx --env-file-if-exists=.env src/debug-consumer.ts"
   },
   "devDependencies": {
     "@types/supertest": "^7.2.1",
