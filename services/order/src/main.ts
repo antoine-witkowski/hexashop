@@ -9,7 +9,10 @@ import { PrismaOrderRepository } from "./infrastructure/persistence/prisma-order
 
 const config = loadConfig(process.env);
 const prisma = createPrismaClient(config.DATABASE_URL);
-const nats = await connect({ servers: config.NATS_URL });
+const nats = await connect({
+  servers: config.NATS_URL,
+  maxReconnectAttempts: -1,
+});
 
 const app = await NestFactory.create(
   OrderModule.register({
