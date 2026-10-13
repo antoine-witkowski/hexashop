@@ -4,6 +4,7 @@ import type { OrderLine } from "./order-line.js";
 
 export type OrderStatus = "PENDING" | "CONFIRMED" | "CANCELLED" | "SHIPPED";
 
+// For each status, the statuses an order may move to next.
 const allowedTransitions: Record<OrderStatus, readonly OrderStatus[]> = {
   PENDING: ["CONFIRMED", "CANCELLED"],
   CONFIRMED: ["SHIPPED"],
@@ -21,9 +22,11 @@ function totalOf(lines: readonly OrderLine[]): number {
 }
 
 export class Order {
+  // Private state: only the methods below can change it.
   #status: OrderStatus;
   #events: OrderEvent[] = [];
 
+  // Private: use Order.place() or Order.reconstitute() instead.
   private constructor(
     readonly id: string,
     readonly customerId: string,
@@ -35,12 +38,7 @@ export class Order {
     this.#status = status;
   }
 
-  pullEvents(): readonly OrderEvent[] {
-    const events = this.#events;
-    this.#events = [];
-    return events;
-  }
-
+  // Creates a new order: applies the creation rules and records OrderPlaced.
   static place(props: {
     id: string;
     customerId: string;
@@ -79,6 +77,25 @@ export class Order {
     return order;
   }
 
+  // Rebuilds an order that already exists (e.g. loaded from the database):
+  // no creation rules, no event.
+  static reconstitute(props: {
+    id: string;
+    customerId: string;
+    status: OrderStatus;
+    lines: readonly OrderLine[];
+    placedAt: Date;
+  }): Order {
+    const { id, customerId, status, lines, placedAt } = props;
+    const totalCents: number = totalOf(lines);
+    return new Order(id, customerId, status, [...lines], totalCents, placedAt);
+  }
+
+  // Read-only access to the private status.
+  get status(): OrderStatus {
+    return this.#status;
+  }
+
   confirm(): void {
     this.#transitionTo("CONFIRMED");
   }
@@ -91,8 +108,11 @@ export class Order {
     this.#transitionTo("SHIPPED");
   }
 
-  get status(): OrderStatus {
-    return this.#status;
+  // Returns the recorded events once, then forgets them.
+  pullEvents(): readonly OrderEvent[] {
+    const events = this.#events;
+    this.#events = [];
+    return events;
   }
 
   #transitionTo(next: OrderStatus): void {
@@ -100,17 +120,5 @@ export class Order {
       throw new InvalidStatusTransitionError(this.#status, next);
     }
     this.#status = next;
-  }
-
-  static reconstitute(props: {
-    id: string;
-    customerId: string;
-    status: OrderStatus;
-    lines: readonly OrderLine[];
-    placedAt: Date;
-  }): Order {
-    const { id, customerId, status, lines, placedAt } = props;
-    const totalCents: number = totalOf(lines);
-    return new Order(id, customerId, status, [...lines], totalCents, placedAt);
   }
 }
