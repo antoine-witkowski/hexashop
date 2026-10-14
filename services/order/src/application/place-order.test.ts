@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { EmptyOrderError } from "../domain/errors.js";
 import { PlaceOrder } from "./place-order.js";
 import {
-  FakeEventPublisher,
   FakeOrderRepository,
   FixedClock,
   FixedIdGenerator,
@@ -12,14 +11,12 @@ const placedAt = new Date("2026-01-01T10:00:00Z");
 
 function setup() {
   const orders = new FakeOrderRepository();
-  const events = new FakeEventPublisher();
   const placeOrder = new PlaceOrder(
     orders,
     new FixedClock(placedAt),
     new FixedIdGenerator("order-1"),
-    events,
   );
-  return { orders, events, placeOrder };
+  return { orders, placeOrder };
 }
 
 describe("PlaceOrder", () => {
@@ -47,28 +44,30 @@ describe("PlaceOrder", () => {
     expect(orders.orders.size).toBe(0);
   });
 
-  it("publishes an OrderPlaced event after saving", async () => {
-    const { events, placeOrder } = setup();
+  it("keeps the OrderPlaced event on the saved order for the repository", async () => {
+    const { orders, placeOrder } = setup();
+
     await placeOrder.execute({
-      customerId: "customer-1",
-      lines: [{ sku: "BOOK-1", quantity: 2, unitPriceCents: 1250 }],
+      customerId: "customer-3",
+      lines: [
+        { sku: "BOOK-3", quantity: 3, unitPriceCents: 500 },
+        { sku: "BOOK-4", quantity: 1, unitPriceCents: 500 },
+      ],
     });
 
-    expect(events.published).toEqual([
-      expect.objectContaining({ type: "OrderPlaced", orderId: "order-1" }),
-    ]);
-  });
-
-  it("does not publish anything for an invalid order", async () => {
-    const { events, placeOrder } = setup();
-
-    await expect(
-      placeOrder.execute({
-        customerId: "customer-1",
-        lines: [],
+    const saved = orders.orders.get("order-1");
+    expect(saved?.pullEvents()).toEqual([
+      expect.objectContaining({
+        type: "OrderPlaced",
+        orderId: "order-1",
+        customerId: "customer-3",
+        lines: [
+          { sku: "BOOK-3", quantity: 3 },
+          { sku: "BOOK-4", quantity: 1 },
+        ],
+        totalCents: 2000,
+        occurredAt: placedAt,
       }),
-    ).rejects.toThrow(EmptyOrderError);
-
-    expect(events.published).toEqual([]);
+    ]);
   });
 });

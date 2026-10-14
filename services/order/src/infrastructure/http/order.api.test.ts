@@ -3,7 +3,6 @@ import type { INestApplication } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import request from "supertest";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FakeEventPublisher } from "../../application/testing/fakes.js";
 import { InMemoryOrderRepository } from "../in-memory-order-repository.js";
 import type { OrderResponse } from "./order-presenter.js";
 import { OrderModule } from "./order.module.js";
@@ -15,7 +14,6 @@ describe("Orders API", () => {
     app = await NestFactory.create(
       OrderModule.register({
         orderRepository: new InMemoryOrderRepository(),
-        eventPublisher: new FakeEventPublisher(),
       }),
       { logger: false },
     );

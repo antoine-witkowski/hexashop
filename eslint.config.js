@@ -72,7 +72,7 @@ export default defineConfig(
             {
               regex: "^@nats-io/",
               message:
-                "Use cases must not know about NATS: depend on the EventPublisher port instead.",
+                "Use cases must not know about NATS: events go through the outbox, written by the OrderRepository.",
             },
           ],
         },
