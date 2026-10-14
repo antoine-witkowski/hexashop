@@ -1,6 +1,7 @@
 import type { OrderRepository } from "../../application/ports/order-repository.js";
 import { OrderLine } from "../../domain/order-line.js";
 import { Order } from "../../domain/order.js";
+import { toEnvelope } from "../messaging/order-event-envelope.js";
 import type { PrismaClient } from "./generated/client.js";
 
 export class PrismaOrderRepository implements OrderRepository {
@@ -27,6 +28,18 @@ export class PrismaOrderRepository implements OrderRepository {
           },
         },
         update: { status: order.status },
+      });
+      await tx.outboxMessage.createMany({
+        data: order.pullEvents().map((event) => {
+          const { subject, envelope } = toEnvelope(event);
+          return {
+            id: envelope.eventId,
+            aggregateId: envelope.aggregateId,
+            subject,
+            type: envelope.type,
+            payload: envelope,
+          };
+        }),
       });
     });
   }
