@@ -44,4 +44,12 @@ export class OutboxRelay {
       { timeout: 30_000 },
     );
   }
+
+  async deletePublishedBefore(cutoff: Date): Promise<number> {
+    const { count } = await this.prisma.outboxMessage.deleteMany({
+      where: { publishedAt: { lt: cutoff } },
+    });
+
+    return count;
+  }
 }

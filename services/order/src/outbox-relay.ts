@@ -22,6 +22,10 @@ process.once("SIGTERM", () => {
 });
 
 const relay = new OutboxRelay(prisma, jetstream(nats));
+const POLL_INTERVAL_MS = 1000; // 1 sec
+const CLEANUP_INTERVAL_MS = 60 * 60 * 1000; // 1 hour
+const RETENTION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+let lastCleanupAt = 0;
 
 console.log("Outbox relay started");
 
@@ -31,10 +35,21 @@ while (!stop.signal.aborted) {
     if (count > 0) {
       console.log(`Published ${String(count)} event(s)`);
     }
+
+    if (Date.now() - lastCleanupAt > CLEANUP_INTERVAL_MS) {
+      const deleted = await relay.deletePublishedBefore(
+        new Date(Date.now() - RETENTION_MS),
+      );
+      if (deleted > 0) {
+        console.log(`Deleted ${String(deleted)} published event(s)`);
+      }
+
+      lastCleanupAt = Date.now();
+    }
   } catch (error) {
     console.error("Outbox batch failed, will retry:", error);
   }
-  await sleep(500);
+  await sleep(POLL_INTERVAL_MS);
 }
 
 await nats.drain();
