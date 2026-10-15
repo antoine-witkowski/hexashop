@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "debug:consume": "tsx --env-file-if-exists=.env src/debug-consumer.ts"
+    "debug:consume": "tsx --env-file-if-exists=.env src/debug-consumer.ts",
+    "outbox:relay": "tsx --env-file-if-exists=.env src/outbox-relay.ts"
   },
   "devDependencies": {
     "@types/supertest": "^7.2.1",
