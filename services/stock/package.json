@@ -1,0 +1,26 @@
+{
+  "name": "@hexashop/stock",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
+    "db:seed": "prisma db seed"
+  },
+  "devDependencies": {
+    "dotenv": "^18.0.8",
+    "prisma": "7.10.0",
+    "tsx": "^4.23.15"
+  },
+  "dependencies": {
+    "@hexashop/contracts": "workspace:*",
+    "@nats-io/jetstream": "^3.4.0",
+    "@nats-io/transport-node": "^3.4.0",
+    "@prisma/adapter-pg": "7.10.0",
+    "@prisma/client": "7.10.0",
+    "zod": "^4.6.7"
+  }
+}

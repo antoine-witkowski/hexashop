@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/infrastructure/persistence/generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model StockItem {
+  sku       String @id
+  available Int
+  reserved  Int    @default(0)
+
+  @@map("stock_items")
+}
+
+model Reservation {
+  orderId    String            @id @map("order_id") @db.Uuid
+  reservedAt DateTime          @default(now()) @map("reserved_at") @db.Timestamptz
+  lines      ReservationLine[]
+
+  @@map("reservations")
+}
+
+model ReservationLine {
+  orderId     String      @map("order_id") @db.Uuid
+  position    Int
+  sku         String
+  quantity    Int
+  reservation Reservation @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+
+  @@id([orderId, position])
+  @@map("reservation_lines")
+}
+
+model ProcessedEvent {
+  eventId     String   @id @map("event_id") @db.Uuid
+  processedAt DateTime @default(now()) @map("processed_at") @db.Timestamptz
+
+  @@map("processed_events")
+}
+
+model OutboxMessage {
+  id          String    @id @db.Uuid
+  aggregateId String    @map("aggregate_id")
+  subject     String
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  publishedAt DateTime? @map("published_at") @db.Timestamptz
+
+  @@map("outbox")
+}
